@@ -29,7 +29,7 @@ module Salessimplicity
     # +attributes[:builder_name] is required too
     #
 
-    def submit_lead(soap_driver,attributes={})
+    def submit_lead(attributes={},soap_driver = @soap_driver)
       [:email,:builder_name].each do |v|
         raise(ArgumentError, "attribute #{v.to_s} is required!") if !attributes[v]
       end

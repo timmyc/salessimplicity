@@ -13,7 +13,10 @@ describe Salessimplicity::Client do
       @guid = 'foobar'
       @endpoint_url = "http://mylamesoapservice.local/service"
       @mock_soap_driver = mock(EleadsSoap)
+      @mock_soap_driver.stub!(:submit_lead)
       @client = Salessimplicity::Client.new(:guid => @guid, :endpoint_url => @endpoint_url)
+      @client.stub!(:soap_driver=).and_return(@mock_soap_driver)
+      @client.stub(:soap_driver).and_return(@mock_soap_driver)
     end
 
     it "should set the endpoint url on creation" do
@@ -48,23 +51,23 @@ describe Salessimplicity::Client do
         it "should require #{v.to_s}" do
           bad_attributes = @valid_attributes
           bad_attributes.delete(v)
-          expect{ @client.submit_lead(@mock_soap_driver,bad_attributes) }.to raise_error(ArgumentError)
+          expect{ @client.submit_lead(bad_attributes) }.to raise_error(ArgumentError)
         end
       end
       it "should build the contact hash properly" do
         @mock_soap_driver.should_receive(:submitLead).with(@contact).and_return(true)
-        @client.submit_lead(@mock_soap_driver,@valid_attributes)
+        @client.submit_lead(@valid_attributes, @mock_soap_driver)
       end
       it "should support an address properly" do
         a = @valid_attributes.merge(:address1 => @address1, :city => @city, :state => @state, :zip => @zip, :phone => @phone)
         h = { 'Contact' => { 'Demos' => nil, 'Email' => @email, 'BuilderName' => @builder_name, 'Address1' => @address1, 'City' => @city, 'State' => @state, 'Zip' => @zip, 'Phone' => @phone }, 'sGUID' => @guid}
         @mock_soap_driver.should_receive(:submitLead).with(h).and_return(true)
-        @client.submit_lead(@mock_soap_driver,a)
+        @client.submit_lead(a, @mock_soap_driver)
       end
       it "should ignore invalid attributes" do
         a = @valid_attributes.merge(:foo => false, :bar => 1)
         @mock_soap_driver.should_receive(:submitLead).with(@contact).and_return(true)
-        @client.submit_lead(@mock_soap_driver,a)
+        @client.submit_lead(a, @mock_soap_driver)
       end
     end
 
